@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
-using TRMDesktopUI.Models;
+using TRMDesktopUI.Library.Models;
 
-namespace TRMDesktopUI.Helpers
+namespace TRMDesktopUI.Library.Api.Helpers
 {
     public class APIHelper : IAPIHelper
     {
         private HttpClient _apiClient { get; set; }
+        private ILoggedInUserModel _loggedInUserModel;
 
-        public APIHelper()
+        public APIHelper(ILoggedInUserModel loggedInUserModel)
         {
             InitializeClient();
+            _loggedInUserModel = loggedInUserModel;
         }
 
         public async Task<AuthenticatedUser> Authenticate(string username, string password)
@@ -33,6 +33,31 @@ namespace TRMDesktopUI.Helpers
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadAsAsync<AuthenticatedUser>();
+                }
+                else
+                {
+                    throw new Exception(response.ReasonPhrase);
+                }
+            }
+        }
+
+        public async Task GetLoggedInUserInfo(string token)
+        {
+            _apiClient.DefaultRequestHeaders.Clear();
+            _apiClient.DefaultRequestHeaders.Accept.Clear();
+            _apiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _apiClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+
+            using (HttpResponseMessage response = await _apiClient.GetAsync("/api/User"))
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsAsync<LoggedInUserModel>();
+                    _loggedInUserModel.Id = result.Id;
+                    _loggedInUserModel.FirstName = result.FirstName;
+                    _loggedInUserModel.LastName = result.LastName;
+                    _loggedInUserModel.CreateDate = result.CreateDate;
+                    _loggedInUserModel.Token = token;
                 }
                 else
                 {
