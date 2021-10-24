@@ -1,15 +1,30 @@
 ﻿using Caliburn.Micro;
+using System.Threading;
+using System.Threading.Tasks;
+using TRMDesktopUI.EventModels;
 
 namespace TRMDesktopUI.ViewModels
 {
-    public class ShellViewModel : Conductor<object>
+    public class ShellViewModel : Conductor<object>, IHandle<LogOnEvent>
     {
-        private LoginViewModel _loginVM;
+        private SalesViewModel _salesVM;
+        private IEventAggregator _eventAggregator;
+        private SimpleContainer _container;
 
-        public ShellViewModel(LoginViewModel loginVM)
+        public ShellViewModel(IEventAggregator eventAggregator, SalesViewModel salesVM, SimpleContainer container)
         {
-            _loginVM = loginVM;
-            ActivateItemAsync(_loginVM);
+            _salesVM = salesVM;
+            _container = container;
+
+            _eventAggregator = eventAggregator;
+            _eventAggregator.SubscribeOnPublishedThread(this);
+
+            ActivateItemAsync(_container.GetInstance<LoginViewModel>() );
+        }
+
+        public async Task HandleAsync(LogOnEvent message, CancellationToken cancellationToken)
+        {
+            await ActivateItemAsync(_salesVM);
         }
     }
 }
