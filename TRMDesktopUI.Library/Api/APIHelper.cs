@@ -19,6 +19,8 @@ namespace TRMDesktopUI.Library.Api.Helpers
             _loggedInUserModel = loggedInUserModel;
         }
 
+        public HttpClient ApiClient => _apiClient;
+
         public async Task<AuthenticatedUser> Authenticate(string username, string password)
         {
             var data = new FormUrlEncodedContent(new[]
