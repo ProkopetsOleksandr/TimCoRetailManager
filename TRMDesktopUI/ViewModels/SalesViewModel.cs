@@ -165,7 +165,7 @@ namespace TRMDesktopUI.ViewModels
         {
             var taxRate = _configHelper.GetTaxRate() / 100;
 
-            decimal taxAmount = 0;
+            decimal taxAmount = 0; 
             foreach (var item in Cart)
             {
                 if (item.Product.IsTaxable)
