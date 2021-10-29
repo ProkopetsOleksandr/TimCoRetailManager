@@ -152,29 +152,16 @@ namespace TRMDesktopUI.ViewModels
 
         private decimal CalculateSubTotal()
         {
-            decimal subTotal = 0;
-            foreach (var item in Cart)
-            {
-                subTotal += item.Product.RetailPrice * item.QuantityInCart;
-            }
-
-            return subTotal;
+            return Cart.Sum(m => m.Product.RetailPrice * m.QuantityInCart);
         }
 
         private decimal CalculateTax()
         {
             var taxRate = _configHelper.GetTaxRate() / 100;
 
-            decimal taxAmount = 0; 
-            foreach (var item in Cart)
-            {
-                if (item.Product.IsTaxable)
-                {
-                    taxAmount += item.Product.RetailPrice * item.QuantityInCart * taxRate;
-                }
-            }
-
-            return taxAmount;
+            return Cart
+                .Where(m => m.Product.IsTaxable)
+                .Sum(m => m.Product.RetailPrice * m.QuantityInCart * taxRate);
         }
     }
 }
