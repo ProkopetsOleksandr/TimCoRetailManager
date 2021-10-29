@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using TRMDesktopUI.Library.Api;
+using TRMDesktopUI.Library.Helpers;
 using TRMDesktopUI.Library.Models;
 
 namespace TRMDesktopUI.ViewModels
@@ -10,15 +11,17 @@ namespace TRMDesktopUI.ViewModels
     public class SalesViewModel : Screen
     {
         private IProductEndpoint _productEndpoint;
+        private IConfigHelper _configHelper { get; }
 
         private BindingList<ProductModel> _products;
         private BindingList<CartItemModel> _cart;
         private int _itemQuantity = 1;
         private ProductModel _selectedProduct;
 
-        public SalesViewModel(IProductEndpoint productEndpoint)
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper)
         {
             _productEndpoint = productEndpoint;
+            _configHelper = configHelper;
             _cart = new BindingList<CartItemModel>();
         }
 
@@ -64,35 +67,9 @@ namespace TRMDesktopUI.ViewModels
             }
         }
 
-        public string SubTotal
-        {
-            get
-            {
-                decimal subTotal = 0;
-                foreach (var item in Cart)
-                {
-                    subTotal += item.Product.RetailPrice * item.QuantityInCart;
-                }
-
-                return subTotal.ToString("c");
-            }
-        }
-
-        public string Tax
-        {
-            get
-            {
-                return "$0.00";
-            }
-        }
-
-        public string Total
-        {
-            get
-            {
-                return "$0.00";
-            }
-        }
+        public string SubTotal => CalculateSubTotal().ToString("c");
+        public string Tax => CalculateTax().ToString("c");
+        public string Total => (CalculateSubTotal() + CalculateTax()).ToString("c");
 
         public bool CanAddToCart
         {
@@ -131,7 +108,8 @@ namespace TRMDesktopUI.ViewModels
             ItemQuantity = 1;
 
             NotifyOfPropertyChange(() => SubTotal);
-            NotifyOfPropertyChange(() => Cart);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
         }
 
         public bool CanRemoveFromCart
@@ -145,6 +123,8 @@ namespace TRMDesktopUI.ViewModels
         public void RemoveFromCart()
         {
             NotifyOfPropertyChange(() => SubTotal);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
         }
 
         public bool CanCheckOut
@@ -168,6 +148,33 @@ namespace TRMDesktopUI.ViewModels
         private async Task LoadProducts()
         {
             Products = new BindingList<ProductModel>(await _productEndpoint.GetAll());
+        }
+
+        private decimal CalculateSubTotal()
+        {
+            decimal subTotal = 0;
+            foreach (var item in Cart)
+            {
+                subTotal += item.Product.RetailPrice * item.QuantityInCart;
+            }
+
+            return subTotal;
+        }
+
+        private decimal CalculateTax()
+        {
+            var taxRate = _configHelper.GetTaxRate() / 100;
+
+            decimal taxAmount = 0;
+            foreach (var item in Cart)
+            {
+                if (item.Product.IsTaxable)
+                {
+                    taxAmount += item.Product.RetailPrice * item.QuantityInCart * taxRate;
+                }
+            }
+
+            return taxAmount;
         }
     }
 }
