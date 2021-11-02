@@ -15,5 +15,11 @@ namespace TRMDataManager.Library.DataAccess
             SqlDataAccess sql = new SqlDataAccess();
             return sql.LoadData<ProductModel, dynamic>("dbo.spProduct_GetAll", null, "TRMData");
         }
+
+        public ProductModel GetProductById(int productId)
+        {
+            SqlDataAccess sql = new SqlDataAccess();
+            return sql.LoadData<ProductModel, dynamic>("dbo.spProduct_GetById", new { Id = productId }, "TRMData").FirstOrDefault();
+        }
     }
 }
