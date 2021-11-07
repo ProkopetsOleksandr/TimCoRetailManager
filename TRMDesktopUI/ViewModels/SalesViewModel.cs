@@ -44,6 +44,12 @@ namespace TRMDesktopUI.ViewModels
             }
         }
 
+        protected override async void OnViewLoaded(object view)
+        {
+            base.OnViewLoaded(view);
+            await LoadProducts();
+        }
+
         public CartItemDisplayModel SelectedCartItem
         {
             get { return _selectedCartItem; }
@@ -149,6 +155,7 @@ namespace TRMDesktopUI.ViewModels
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
             NotifyOfPropertyChange(() => CanCheckOut);
+            NotifyOfPropertyChange(() => CanAddToCart);
         }
 
         public bool CanCheckOut => Cart.Count > 0;
@@ -170,18 +177,7 @@ namespace TRMDesktopUI.ViewModels
             }
 
             await _saleEndpoint.PostSale(sale);
-        }
-
-        protected override async void OnViewLoaded(object view)
-        {
-            base.OnViewLoaded(view);
-            await LoadProducts();
-        }
-
-        private async Task LoadProducts()
-        {
-            var products = await _productEndpoint.GetAll();
-            Products = _mapper.Map<BindingList<ProductDisplayModel>>(products);
+            await ResetSalesViewModel();
         }
 
         private decimal CalculateSubTotal()
@@ -196,6 +192,26 @@ namespace TRMDesktopUI.ViewModels
             return Cart
                 .Where(m => m.Product.IsTaxable)
                 .Sum(m => m.Product.RetailPrice * m.QuantityInCart * taxRate);
+        }
+
+        private async Task ResetSalesViewModel()
+        {
+            _cart.Clear();
+            _selectedCartItem = null;
+            NotifyOfPropertyChange(() => SubTotal);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
+            NotifyOfPropertyChange(() => CanCheckOut);
+            NotifyOfPropertyChange(() => CanAddToCart);
+            NotifyOfPropertyChange(() => CanRemoveFromCart);
+
+            await LoadProducts();
+        }
+
+        private async Task LoadProducts()
+        {
+            var products = await _productEndpoint.GetAll();
+            Products = _mapper.Map<BindingList<ProductDisplayModel>>(products);
         }
     }
 }

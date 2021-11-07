@@ -9,14 +9,18 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top" FontSize="18">
             <MenuItem Header="_File">
-                
+                <MenuItem x:Name="Exit" Header="E_xit" />
             </MenuItem>
-            <MenuItem Header="_Account">
-                <MenuItem x:Name="LoginScreen" Header="Login" />
+            <MenuItem Header="_Account" Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                <MenuItem x:Name="LogOut" Header="_Log Out" />
             </MenuItem>
         </Menu>
         <Grid>
-            <ContentControl x:Name="ActiveItem" Margin="20 5 20 20"></ContentControl>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="6*"/>
+                <ColumnDefinition Width="491*"/>
+            </Grid.ColumnDefinitions>
+            <ContentControl x:Name="ActiveItem" Margin="7.9,5,19.6,19.8" Grid.Column="1"></ContentControl>
         </Grid>
     </DockPanel>
 </Window>
