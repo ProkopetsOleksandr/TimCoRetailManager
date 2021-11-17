@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -7,7 +8,7 @@ using System.Linq;
 
 namespace TRMDataManager.Library.Internal.DataAccess
 {
-    internal class SqlDataAccess
+    internal class SqlDataAccess : IDisposable
     {
         public string GetConnectionString(string name)
         {
@@ -34,6 +35,48 @@ namespace TRMDataManager.Library.Internal.DataAccess
             {
                 connection.Execute(storeProcedure, parameters, commandType: CommandType.StoredProcedure);
             }
+        }
+
+        public void SaveDataInTransaction<T>(string storeProcedure, T parameters)
+        {
+            _dbConnection.Execute(storeProcedure, parameters, 
+                commandType: CommandType.StoredProcedure, transaction: _dbTransaction);
+        }
+
+        public List<T> LoadDataInTransaction<T, U>(string storeProcedure, U parameters)
+        {
+            return _dbConnection
+                    .Query<T>(storeProcedure, parameters, 
+                    commandType: CommandType.StoredProcedure, transaction: _dbTransaction).ToList();
+        }
+
+        private IDbConnection _dbConnection;
+        private IDbTransaction _dbTransaction;
+
+        public void StartTransaction(string connectionStringName)
+        {
+            var connectionString = GetConnectionString(connectionStringName);
+
+            _dbConnection = new SqlConnection(connectionString);
+            _dbConnection.Open();
+            _dbTransaction = _dbConnection.BeginTransaction();
+        }
+
+        public void CommitTransaction()
+        {
+            _dbTransaction?.Commit();
+            _dbConnection?.Close();
+        }
+
+        public void RollbackTransaction()
+        {
+            _dbTransaction?.Rollback();
+            _dbConnection?.Close();
+        }
+
+        public void Dispose()
+        {
+            CommitTransaction();
         }
     }
 }
