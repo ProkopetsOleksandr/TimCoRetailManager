@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using Caliburn.Micro;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using TRMDesktopUI.Library.Api;
 using TRMDesktopUI.Library.Helpers;
 using TRMDesktopUI.Library.Models;
@@ -16,6 +19,7 @@ namespace TRMDesktopUI.ViewModels
         private IProductEndpoint _productEndpoint;
         private ISaleEndpoint _saleEndpoint;
         private IMapper _mapper;
+        private IWindowManager _windowManager;
         private IConfigHelper _configHelper { get; }
 
         private BindingList<ProductDisplayModel> _products;
@@ -24,12 +28,18 @@ namespace TRMDesktopUI.ViewModels
         private ProductDisplayModel _selectedProduct;
         private CartItemDisplayModel _selectedCartItem;
 
-        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint, IMapper mapper)
+        public SalesViewModel(
+            IProductEndpoint productEndpoint, 
+            IConfigHelper configHelper, 
+            ISaleEndpoint saleEndpoint, 
+            IMapper mapper,
+            IWindowManager windowManager)
         {
             _productEndpoint = productEndpoint;
             _saleEndpoint = saleEndpoint;
             _configHelper = configHelper;
             _mapper = mapper;
+            _windowManager = windowManager;
             _cart = new BindingList<CartItemDisplayModel>();
         }
 
@@ -47,7 +57,23 @@ namespace TRMDesktopUI.ViewModels
         protected override async void OnViewLoaded(object view)
         {
             base.OnViewLoaded(view);
-            await LoadProducts();
+            try
+            {
+                await LoadProducts();
+            }
+            catch (Exception ex)
+            {
+                var status = IoC.Get<StatusInfoViewModel>();
+                status.Update("Unauthorize access", "Sorry, you don't have permission to see this page");
+
+                dynamic settings = new ExpandoObject();
+                settings.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                settings.ResizeMode = ResizeMode.NoResize;
+                settings.Title = "System Erorr";
+
+                await _windowManager.ShowDialogAsync(status, null, settings);
+                await TryCloseAsync();
+            }
         }
 
         public CartItemDisplayModel SelectedCartItem
