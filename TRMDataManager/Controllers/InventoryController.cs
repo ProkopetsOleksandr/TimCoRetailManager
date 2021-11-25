@@ -9,6 +9,7 @@ namespace TRMDataManager.Controllers
     [Authorize]
     public class InventoryController : Controller
     {
+        [Authorize(Roles = "Manager,Admin")]
         public List<InventoryModel> Get()
         {
             var inventoryData = new InventoryData();
@@ -16,6 +17,7 @@ namespace TRMDataManager.Controllers
             return inventoryData.GetInventory();
         }
 
+        [Authorize(Roles = "Admin")]
         public ActionResult Post(InventoryModel item)
         {
             var inventoryData = new InventoryData();
