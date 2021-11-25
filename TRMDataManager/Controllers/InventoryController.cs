@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Net;
-using System.Web.Mvc;
+using System.Web.Http;
 using TRMDataManager.Library.DataAccess;
 using TRMDataManager.Library.Models;
 
 namespace TRMDataManager.Controllers
 {
     [Authorize]
-    public class InventoryController : Controller
+    public class InventoryController : ApiController
     {
         [Authorize(Roles = "Manager,Admin")]
         public List<InventoryModel> Get()
@@ -18,12 +17,10 @@ namespace TRMDataManager.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public ActionResult Post(InventoryModel item)
+        public void Post(InventoryModel item)
         {
             var inventoryData = new InventoryData();
             inventoryData.SaveInventoryRecord(item);
-
-            return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
     }
 }
