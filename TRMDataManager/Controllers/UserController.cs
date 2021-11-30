@@ -2,6 +2,7 @@
 using Microsoft.AspNet.Identity.EntityFramework;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Http;
 using TRMDataManager.Library.DataAccess;
 using TRMDataManager.Library.Models;
@@ -48,6 +49,45 @@ namespace TRMDataManager.Controllers
             }
 
             return applicationUserModels;
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        [Route("api/User/Admin/GetAllRoles")]
+        public Dictionary<string, string> GetAllRoles()
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                return context.Roles.ToDictionary(r => r.Id, r => r.Name);
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [Route("api/User/Admin/AddRole")]
+        public async Task AddRole(UserRolePairViewModel model)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var userStore = new UserStore<ApplicationUser>(context);
+                var userManager = new UserManager<ApplicationUser>(userStore);
+
+                await userManager.AddToRoleAsync(model.UserId, model.RoleName);
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [Route("api/User/Admin/RemoveRole")]
+        public async Task RemoveRole(UserRolePairViewModel model)
+        {
+            using (var context = new ApplicationDbContext())
+            {
+                var userStore = new UserStore<ApplicationUser>(context);
+                var userManager = new UserManager<ApplicationUser>(userStore);
+
+                await userManager.RemoveFromRoleAsync(model.UserId, model.RoleName);
+            }
         }
     }
 }

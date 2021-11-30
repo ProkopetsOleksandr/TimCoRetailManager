@@ -4,7 +4,7 @@ using TRMDesktopUI.Library.Models;
 
 namespace TRMDesktopUI.Library.Api
 {
-    public interface IUserEndpoint
+    public interface IUserEndpoint1
     {
         Task AddUserToRole(string userId, string roleName);
         Task<List<UserModel>> GetAll();
