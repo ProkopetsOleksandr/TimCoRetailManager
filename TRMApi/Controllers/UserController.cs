@@ -40,7 +40,7 @@ namespace TRMApi.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        [Route("api/User/Admin/GetAllUsers")]
+        [Route("Admin/GetAllUsers")]
         public List<ApplicationUserModel> GetAll()
         {
             var applicationUserModels = new List<ApplicationUserModel>();
@@ -65,7 +65,7 @@ namespace TRMApi.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        [Route("api/User/Admin/GetAllRoles")]
+        [Route("Admin/GetAllRoles")]
         public Dictionary<string, string> GetAllRoles()
         {
             return _dbContext.Roles.ToDictionary(r => r.Id, r => r.Name);
@@ -73,7 +73,7 @@ namespace TRMApi.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        [Route("api/User/Admin/AddRole")]
+        [Route("Admin/AddRole")]
         public async Task AddRole(UserRolePairViewModel model)
         {
             var user = await _dbContext.Users.FindAsync(model.UserId);
@@ -82,7 +82,7 @@ namespace TRMApi.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        [Route("api/User/Admin/RemoveRole")]
+        [Route("Admin/RemoveRole")]
         public async Task RemoveRole(UserRolePairViewModel model)
         {
             var user = await _dbContext.Users.FindAsync(model.UserId);

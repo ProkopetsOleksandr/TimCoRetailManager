@@ -20,6 +20,7 @@ namespace TRMApi.Controllers
             _configuration = configuration;
         }
 
+        [HttpPost]
         [Authorize(Roles = "Cashier")]
         public void Post(SaleModel sale)
         {
@@ -29,6 +30,7 @@ namespace TRMApi.Controllers
             saleData.SaveSale(sale, userId);
         }
 
+        [HttpGet]
         [Authorize(Roles = "Admin,Manager")]
         [Route("GetSalesReport")]
         public List<SaleReportModel> GetSalesReport()
