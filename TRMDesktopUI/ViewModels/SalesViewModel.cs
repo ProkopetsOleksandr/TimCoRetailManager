@@ -61,7 +61,7 @@ namespace TRMDesktopUI.ViewModels
             {
                 await LoadProducts();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 var status = IoC.Get<StatusInfoViewModel>();
                 status.Update("Unauthorize access", "Sorry, you don't have permission to see this page");
