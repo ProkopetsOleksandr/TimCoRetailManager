@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -16,11 +17,13 @@ namespace TRMApi.Controllers
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public TokenController(ApplicationDbContext dbContext, UserManager<IdentityUser> userManager)
+        public TokenController(ApplicationDbContext dbContext, UserManager<IdentityUser> userManager, IConfiguration configuration)
         {
             _dbContext = dbContext;
             _userManager = userManager;
+            _configuration = configuration;
         }
 
         [Route("/token")]
@@ -67,7 +70,7 @@ namespace TRMApi.Controllers
                 claims.Add(new Claim(ClaimTypes.Role, role.Name));
             }
 
-            var secret = Encoding.UTF8.GetBytes("MySuperSecretKey12345");
+            var secret = Encoding.UTF8.GetBytes(_configuration.GetValue<string>("Secrets:SecurityKey"));
             var token = new JwtSecurityToken(
                 new JwtHeader(
                     new SigningCredentials(
