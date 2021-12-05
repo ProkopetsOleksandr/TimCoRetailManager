@@ -2,14 +2,13 @@
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 
 namespace TRMDataManager.Library.Internal.DataAccess
 {
-    internal class SqlDataAccess : IDisposable
+    public class SqlDataAccess : IDisposable, ISqlDataAccess
     {
         private readonly IConfiguration _configuration;
 
@@ -22,7 +21,7 @@ namespace TRMDataManager.Library.Internal.DataAccess
 
         public string GetConnectionString(string name)
         {
-            return _configuration.GetConnectionString(name); 
+            return _configuration.GetConnectionString(name);
         }
 
         public List<T> LoadData<T, U>(string storeProcedure, U parameters, string connectionStringName)
@@ -40,7 +39,7 @@ namespace TRMDataManager.Library.Internal.DataAccess
         public void SaveData<T>(string storeProcedure, T parameters, string connectionStringName)
         {
             var connectionString = GetConnectionString(connectionStringName);
-            
+
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
                 connection.Execute(storeProcedure, parameters, commandType: CommandType.StoredProcedure);
@@ -56,7 +55,7 @@ namespace TRMDataManager.Library.Internal.DataAccess
         public List<T> LoadDataInTransaction<T, U>(string storeProcedure, U parameters)
         {
             return _dbConnection
-                    .Query<T>(storeProcedure, parameters, 
+                    .Query<T>(storeProcedure, parameters,
                     commandType: CommandType.StoredProcedure, transaction: _dbTransaction).ToList();
         }
 
@@ -92,7 +91,7 @@ namespace TRMDataManager.Library.Internal.DataAccess
 
         public void Dispose()
         {
-            if(!IsConnectionClosed)
+            if (!IsConnectionClosed)
             {
                 try
                 {

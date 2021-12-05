@@ -10,6 +10,8 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
 using TRMApi.Data;
+using TRMDataManager.Library.DataAccess;
+using TRMDataManager.Library.Internal.DataAccess;
 
 namespace TRMApi
 {
@@ -35,6 +37,9 @@ namespace TRMApi
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            // Personal services
+            SetupServices(services);
 
             services.AddAuthentication(options =>
             {
@@ -99,6 +104,15 @@ namespace TRMApi
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+        }
+
+        private void SetupServices(IServiceCollection services)
+        {
+            services.AddTransient<IInventoryData, InventoryData>();
+            services.AddTransient<ISqlDataAccess, SqlDataAccess>();
+            services.AddTransient<IProductData, ProductData>();
+            services.AddTransient<ISaleData, SaleData>();
+            services.AddTransient<IUserData, UserData>();
         }
     }
 }

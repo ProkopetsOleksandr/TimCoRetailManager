@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -20,22 +19,21 @@ namespace TRMApi.Controllers
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly IConfiguration _configuration;
+        private readonly IUserData _userData;
 
-        public UserController(ApplicationDbContext dbContext, UserManager<IdentityUser> userManager, IConfiguration configuration)
+        public UserController(ApplicationDbContext dbContext, UserManager<IdentityUser> userManager, IUserData userData)
         {
             _dbContext = dbContext;
             _userManager = userManager;
-            _configuration = configuration;
+            _userData = userData;
         }
 
         [HttpGet]
         public UserModel GetById()
         {
             var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            UserData data = new UserData(_configuration);
 
-            return data.GetUserById(id).First();
+            return _userData.GetUserById(id).First();
         }
 
         [HttpGet]
